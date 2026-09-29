@@ -1,0 +1,19 @@
+NEXT STEPS (v3.1)
+
+1) Get LONG M15 or M5 XAUUSD history from ONE provider (Dukascopy / your broker's MT5),
+   ideally 2012-present. The public H4 file used for testing is a stand-in.
+2) Find your timestamp conventions and check them:
+     python validate_data.py --xauusd data/your.csv [--data-tz Europe/Athens] [--ts-convention open]
+   Fix every ISSUE (wrong time zone = wrong sessions = wrong labels).
+3) Run the leak test on YOUR file:
+     python tests/test_no_leak.py --xauusd data/your.csv [same data args]
+4) Walk-forward with a frozen holdout that you never tune on:
+     python walk_forward_multitask.py --xauusd data/your.csv --holdout-start 2023-01-01
+5) Any new feature, data source or model must beat core3 AND the current model on the
+   development period, and must not degrade the holdout.
+6) Research ideas, in order:
+   a. intraday "second-stage" model: at the London open, predict sweep / reject using
+      the Asia session (needs M15/M5);
+   b. sweep -> reject vs accept (labels y_pdh_reject / y_pdl_reject already exist);
+   c. news-day flags (CPI/NFP/FOMC calendar with timestamps);
+   d. execution-level backtest (spread, slippage, session rules) before any live use.

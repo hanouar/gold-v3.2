@@ -1,0 +1,30 @@
+sessions=3187  labelled=3173  features=59  range=2013-10-18..2026-02-05  classifier=logit
+2017: n=257 | PDH auc=0.831 (core3 0.819) BSS=+0.336 | PDL auc=0.786 (core3 0.770) BSS=+0.208 | up MAE skill=+0.008 down=-0.040
+2018: n=258 | PDH auc=0.785 (core3 0.773) BSS=+0.244 | PDL auc=0.752 (core3 0.758) BSS=+0.199 | up MAE skill=-0.020 down=-0.032
+2019: n=258 | PDH auc=0.841 (core3 0.829) BSS=+0.359 | PDL auc=0.803 (core3 0.797) BSS=+0.241 | up MAE skill=-0.002 down=-0.020
+2020: n=259 | PDH auc=0.839 (core3 0.825) BSS=+0.327 | PDL auc=0.818 (core3 0.796) BSS=+0.304 | up MAE skill=+0.017 down=-0.013
+2021: n=258 | PDH auc=0.852 (core3 0.859) BSS=+0.364 | PDL auc=0.825 (core3 0.824) BSS=+0.302 | up MAE skill=-0.012 down=-0.020
+2022: n=258 | PDH auc=0.809 (core3 0.808) BSS=+0.287 | PDL auc=0.780 (core3 0.783) BSS=+0.237 | up MAE skill=-0.022 down=+0.027
+2023: n=257 | PDH auc=0.811 (core3 0.812) BSS=+0.287 | PDL auc=0.829 (core3 0.830) BSS=+0.324 | up MAE skill=-0.026 down=+0.026
+2024: n=259 | PDH auc=0.801 (core3 0.802) BSS=+0.287 | PDL auc=0.761 (core3 0.752) BSS=+0.203 | up MAE skill=-0.005 down=-0.000
+2025: n=258 | PDH auc=0.854 (core3 0.834) BSS=+0.379 | PDL auc=0.782 (core3 0.763) BSS=+0.249 | up MAE skill=+0.036 down=-0.009
+2026: n= 25 | PDH auc=0.794 (core3 0.754) BSS=+0.124 | PDL auc=0.583 (core3 0.556) BSS=-0.160 | up MAE skill=+0.137 down=+0.045
+
+=== POOLED OUT-OF-SAMPLE ===
+[development] n=1290
+  pdh_sweep  AUC 0.829 (core3 0.823)  acc 0.747 (base rate 0.513)  Brier skill +0.326  p>=0.70: hit 0.862 on 24% of days  beats_core3=True
+  pdl_sweep  AUC 0.791 (core3 0.787)  acc 0.730 (base rate 0.449)  Brier skill +0.251  p>=0.70: hit 0.766 on 24% of days  beats_core3=True
+  up_excursion   MAE 0.313 ATR vs median 0.313 (skill -0.001); p80 coverage 0.774
+  down_excursion MAE 0.327 ATR vs median 0.319 (skill -0.025); p80 coverage 0.803
+[holdout] n=1057
+  pdh_sweep  AUC 0.819 (core3 0.814)  acc 0.735 (base rate 0.532)  Brier skill +0.306  p>=0.70: hit 0.844 on 32% of days  beats_core3=True
+  pdl_sweep  AUC 0.787 (core3 0.783)  acc 0.725 (base rate 0.437)  Brier skill +0.244  p>=0.70: hit 0.786 on 20% of days  beats_core3=True
+  up_excursion   MAE 0.335 ATR vs median 0.336 (skill +0.002); p80 coverage 0.755
+  down_excursion MAE 0.317 ATR vs median 0.321 (skill +0.012); p80 coverage 0.788
+[all] n=2347
+  pdh_sweep  AUC 0.824 (core3 0.819)  acc 0.741 (base rate 0.522)  Brier skill +0.317  p>=0.70: hit 0.853 on 27% of days  beats_core3=True
+  pdl_sweep  AUC 0.789 (core3 0.786)  acc 0.728 (base rate 0.444)  Brier skill +0.248  p>=0.70: hit 0.774 on 22% of days  beats_core3=True
+  up_excursion   MAE 0.323 ATR vs median 0.323 (skill +0.000); p80 coverage 0.766
+  down_excursion MAE 0.323 ATR vs median 0.320 (skill -0.008); p80 coverage 0.796
+
+Saved reports to reports/wf_h4

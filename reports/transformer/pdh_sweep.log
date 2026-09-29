@@ -1,0 +1,30 @@
+{'train': 1573, 'val': 517, 'test': 1057} features: 59 target: y_pdh_sweep
+epoch=01 train_loss=0.6258 val_loss=0.5415
+epoch=02 train_loss=0.5581 val_loss=0.5301
+epoch=03 train_loss=0.5372 val_loss=0.5306
+epoch=04 train_loss=0.5251 val_loss=0.5246
+epoch=05 train_loss=0.5117 val_loss=0.5216
+epoch=06 train_loss=0.5041 val_loss=0.5274
+epoch=07 train_loss=0.4954 val_loss=0.5232
+epoch=08 train_loss=0.4809 val_loss=0.5367
+epoch=09 train_loss=0.4738 val_loss=0.5329
+epoch=10 train_loss=0.4679 val_loss=0.5417
+epoch=11 train_loss=0.4539 val_loss=0.5271
+Early stopping
+{
+  "test_period_from": "2022-01-01",
+  "n_test": 1057,
+  "transformer": {
+    "accuracy": 0.7161778618732261,
+    "log_loss": 0.5473687957866219,
+    "auc": 0.8071210323879362,
+    "brier": 0.18392910063266754
+  },
+  "logit_reference": {
+    "accuracy": 0.7322611163670766,
+    "log_loss": 0.5237646724032833,
+    "auc": 0.816805061289047,
+    "brier": 0.17494148031392195
+  }
+}
+Saved: models/transformer.pt
