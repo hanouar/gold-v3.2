@@ -73,6 +73,18 @@ python evaluate_model.py --model models/xauusd_multitask.joblib --xauusd data/xa
 
 `validate_data.py` signale un fuseau probablement faux (pause quotidienne mal placée, sessions courtes).
 
+## Live prediction with MetaTrader 5
+
+Avec MT5 ouvert et connecté (Windows) :
+
+```powershell
+python fetch_mt5_data.py
+python validate_data.py --xauusd data/xauusd_mt5_m15_current.csv --session-tz UTC --session-start 21:00
+python predict_multitask.py --xauusd data/xauusd_mt5_m15_current.csv --out-dir reports
+```
+
+`fetch_mt5_data.py` convertit l'heure serveur (`NY+7`) en UTC et ignore la bougie en cours. Guide pas à pas, horaires de session et piège de l'heure d'été : **`instructions.txt`**.
+
 ## Structure
 
 | Fichier | Rôle |

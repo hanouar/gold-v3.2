@@ -1,0 +1,184 @@
+================================
+GOLD V3.2 - HOW TO RUN
+================================
+
+This predicts the NEXT gold (XAUUSD) trading session from the LAST COMPLETED session,
+using live candles from your MetaTrader 5 terminal.
+Research tool only - not a trading signal.
+
+
+1. OPEN POWERSHELL
+------------------
+Press the Windows key, type "PowerShell", press Enter. Then go to the project folder:
+
+    cd "C:\Users\user\Desktop\gold v3.2\xauusd_ai_model_v3_2"
+
+(Change the path if you cloned the project somewhere else.)
+
+
+2. UPDATE PROJECT FROM GITHUB
+-----------------------------
+    git pull
+
+
+3. ACTIVATE PYTHON ENVIRONMENT
+------------------------------
+If the .venv folder already exists:
+
+    .\.venv\Scripts\Activate.ps1
+
+If it does not exist (first time on a new PC):
+
+    python -m venv .venv
+    .\.venv\Scripts\Activate.ps1
+    python -m pip install --upgrade pip
+    pip install -r requirements.txt
+
+If PowerShell blocks activation ("running scripts is disabled"), either run once:
+
+    Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+
+or skip activation and replace "python" with ".\.venv\Scripts\python.exe" in every command, e.g.:
+
+    .\.venv\Scripts\python.exe fetch_mt5_data.py
+
+FIRST TIME ONLY - the trained model is not stored on GitHub. If the file
+models\xauusd_multitask.joblib does not exist, build it once (takes about a minute):
+
+    python public_data_bootstrap.py
+    python prepare_public_data.py
+    python train_multitask.py --xauusd data/xauusd_h4_2013_2026.csv --session-tz UTC --session-start 21:00
+
+
+4. START METATRADER 5
+---------------------
+- Open MetaTrader 5.
+- Make sure it is logged into your broker account (bottom-right shows a connection, not "No connection").
+- Make sure XAUUSD (gold) is in Market Watch (right-click Market Watch > Symbols if needed).
+- Leave MT5 open while you run the next steps.
+
+
+5. FETCH LATEST XAUUSD DATA FROM MT5
+------------------------------------
+    python fetch_mt5_data.py
+
+It connects to MT5, finds the gold symbol, downloads ~400 days of M15 candles,
+drops the candle still forming, converts broker time (New York + 7h) to UTC and writes:
+
+    data\xauusd_mt5_m15_current.csv
+
+It prints the broker, symbol, latest completed candle (UTC) and rows written.
+Options (only if needed):  --symbol XAUUSDm   --terminal "C:\Program Files\MetaTrader 5\terminal64.exe"
+
+
+6. VALIDATE DATA
+----------------
+    python validate_data.py --xauusd data/xauusd_mt5_m15_current.csv --session-tz UTC --session-start 21:00
+
+It must end with "OK - no blocking issue found."
+"large price jumps" warnings are usually real news moves - look at them, they do not block.
+
+
+7. GENERATE CURRENT PREDICTION
+------------------------------
+    python predict_multitask.py --xauusd data/xauusd_mt5_m15_current.csv --out-dir reports
+
+(The session settings are read from the saved model; do not add session arguments here.)
+
+
+8. WHERE TO FIND THE RESULT
+---------------------------
+The prediction is printed in PowerShell and saved to:
+
+    reports\latest_prediction_<SESSION-DATE>.json
+
+<SESSION-DATE> is the last COMPLETED session the prediction is based on.
+Main fields:
+    based_on_session          last completed session used
+    pdh_sweep_probability     chance the next session trades above that session's HIGH (PDH)
+    pdl_sweep_probability     chance the next session trades below that session's LOW (PDL)
+    up/down_excursion_atr_p80 80% volatility envelope (in ATR)
+    price_levels              PDH, PDL, close, ATR and projected price levels
+    first_liquidity_bias      BUY_SIDE / SELL_SIDE / BALANCED
+    warnings                  read these! e.g. "treated as INCOMPLETE, using the previous session"
+
+
+9. IMPORTANT SESSION TIME
+-------------------------
+The saved model defines a trading day as 21:00 UTC -> 21:00 UTC (Monday to Friday).
+A prediction is only for the NEXT session once the current one is finished.
+
+  * Run the prediction AFTER 21:00 UTC (= 17:00 New York), e.g. at 21:15 UTC.
+  * If you run it earlier, the program ignores today's unfinished session and predicts
+    TODAY's session from yesterday's data (the "INCOMPLETE" warning tells you this).
+  * A Friday run after 21:00 UTC predicts Monday's session.
+
+DAYLIGHT SAVING TIME (DST) WARNING:
+  * The market's day really starts at 17:00 New York time. That is 21:00 UTC only while
+    US summer time is on (2nd Sunday of March -> 1st Sunday of November).
+  * From 1 November 2026 to 14 March 2027 the market day starts at 22:00 UTC, but the
+    model code still splits sessions at 21:00 UTC (the code is NOT DST-aware yet).
+    fetch_mt5_data.py prints a warning when this is the case.
+  * During that period: run after 22:00 UTC, and know that the last hour of each day is
+    counted in the next session, so winter predictions are slightly less reliable.
+    (The H4 training data used a fixed broker clock = New York 17:00 all year; a proper
+    fix is to make the session DST-aware and retrain - not done yet.)
+
+
+10. TROUBLESHOOTING
+-------------------
+MT5 connection failed
+    Open MT5 and log in, then rerun. If you have several MT5 installs, point to the right one:
+    python fetch_mt5_data.py --terminal "C:\Program Files\MetaTrader 5\terminal64.exe"
+
+MetaTrader5 Python package missing
+    pip install MetaTrader5
+
+XAUUSD symbol not found
+    Look at the gold name in MT5 Market Watch (XAUUSDm, GOLD, XAUUSD.pro...) and pass it:
+    python fetch_mt5_data.py --symbol XAUUSDm
+
+PowerShell activation blocked
+    Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+    (or use .\.venv\Scripts\python.exe instead of python)
+
+No new candles
+    Market is closed (weekend / holiday) or MT5 is disconnected. Check MT5's connection
+    status; the "Latest completed candle" line shows the newest candle received.
+
+Session not finished yet
+    The prediction shows "treated as INCOMPLETE, using the previous session". Rerun
+    fetch_mt5_data.py and the prediction after 21:00 UTC (22:00 UTC in winter).
+
+Wrong Windows clock / time zone
+    fetch_mt5_data.py prints "Windows clock is ~N min BEHIND broker time".
+    The program uses the Windows clock to decide whether a session is over.
+    Fix it: Settings > Time & language > Date & time > "Set time automatically" ON,
+    correct time zone selected, then "Sync now". Check with:
+        (Get-Date).ToUniversalTime()
+    which must show the real UTC time (compare with https://time.is/UTC).
+
+Broker uses a different server clock
+    If fetch_mt5_data.py warns "daily break reopens at NY hour ... expected 18",
+    your broker is not on New York + 7h. Pass its zone, e.g. --server-tz Europe/Athens.
+
+
+11. SAFETY
+----------
+- Do not delete historical datasets in data\ (they are not on GitHub).
+- Do not overwrite models\xauusd_multitask.joblib unless you intentionally retrain.
+- Do not run train_multitask.py when you only want a prediction.
+- Never commit credentials, MT5 passwords/logins or API keys (e.g. TWELVE_DATA_API_KEY).
+
+
+================================
+QUICK RUN
+================================
+(MT5 open and logged in; run after 21:00 UTC)
+
+cd "C:\Users\user\Desktop\gold v3.2\xauusd_ai_model_v3_2"
+git pull
+.\.venv\Scripts\Activate.ps1
+python fetch_mt5_data.py
+python validate_data.py --xauusd data/xauusd_mt5_m15_current.csv --session-tz UTC --session-start 21:00
+python predict_multitask.py --xauusd data/xauusd_mt5_m15_current.csv --out-dir reports

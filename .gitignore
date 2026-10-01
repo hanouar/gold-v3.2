@@ -1,0 +1,19 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Secrets
+.env
+*.key
+
+# Local market data (downloaded / fetched; keep only the schema examples)
+data/*
+!data/example_*.csv
+
+# Trained models (rebuild with train_multitask.py)
+models/
+
+# Generated live predictions
+reports/latest_prediction_*

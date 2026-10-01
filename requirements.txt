@@ -5,3 +5,4 @@ joblib>=1.3
 requests>=2.28
 pytest>=7  # tests/
 torch>=2.1  # optional: train_transformer.py only
+MetaTrader5>=5.0; sys_platform == "win32"  # optional: fetch_mt5_data.py only (live data)

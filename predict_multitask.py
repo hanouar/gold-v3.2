@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import warnings
+from pathlib import Path
 
 import joblib
 import pandas as pd
@@ -29,6 +30,7 @@ def main():
     ap.add_argument("--model", default="models/xauusd_multitask.joblib")
     ap.add_argument("--asof", default=None, help="Predict from this session date instead of the latest")
     ap.add_argument("--allow-partial", action="store_true")
+    ap.add_argument("--out-dir", default=None, help="Also save the JSON to <dir>/latest_prediction_<session>.json")
     args = ap.parse_args()
 
     pack = joblib.load(args.model)
@@ -81,7 +83,7 @@ def main():
         f"p{q}_high_projection": c + res[f"up_excursion_atr_p{q}"] * a,
         f"p{q}_low_projection": c - res[f"down_excursion_atr_p{q}"] * a,
     }
-    print(json.dumps({
+    out = {
         "based_on_session": str(row.index[-1].date()),
         "session_end_utc": str(r["session_end_utc"]),
         "model_trained_through": pack["models"]["_meta"]["train_end"],
@@ -91,7 +93,14 @@ def main():
         "warnings": warnings_out,
         "note": ("Sweep probabilities are walk-forward calibrated. Excursion medians have ~no skill over a constant "
                  "in tests: use them as a volatility envelope, not a target."),
-    }, indent=2))
+    }
+    text = json.dumps(out, indent=2)
+    print(text)
+    if args.out_dir:
+        path = Path(args.out_dir) / f"latest_prediction_{out['based_on_session']}.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text + "\n", encoding="utf-8")
+        print(f"Saved: {path}")
 
 
 if __name__ == "__main__":
